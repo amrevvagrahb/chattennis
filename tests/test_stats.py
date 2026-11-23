@@ -1,5 +1,5 @@
 import pytest
-from src.tools.stats import load_matches, win_rate
+from src.tools.stats import load_matches, win_rate, head_to_head
 
 @pytest.fixture(scope="module")
 def df():
@@ -22,11 +22,24 @@ def test_surface_filter_reduces_matches(df):
     assert clay["matches"] < overall["matches"]
 
 
-
-
-
-
-
 def test_unknown_player_returns_none_rate(df):
     r = win_rate(df, "Nobody Atall")
     assert r["matches"] == 0
+    assert r["win_rate"]== None
+
+def test_h2h_wins_add_up(df):
+    r = head_to_head(df, "Rafael Nadal", "Roger Federer")
+    assert r["player1_wins"] + r["player2_wins"] == r["matches"]
+
+
+def test_h2h_is_symmetric(df):
+    a = head_to_head(df, "Rafael Nadal", "Roger Federer")
+    b = head_to_head(df, "Roger Federer", "Rafael Nadal")
+    assert a["player1_wins"] == b["player2_wins"]
+    assert a["matches"] == b["matches"]
+
+
+def test_h2h_surface_filter(df):
+    overall = head_to_head(df, "Rafael Nadal", "Roger Federer")
+    clay = head_to_head(df, "Rafael Nadal", "Roger Federer", surface="Clay")
+    assert clay["matches"] <= overall["matches"]    

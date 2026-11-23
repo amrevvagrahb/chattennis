@@ -36,3 +36,22 @@ def win_rate(df: pd.DataFrame, player: str, surface: str | None = None, year: in
         "matches": total,
         "win_rate": round(wins / total, 3) if total else None
     }
+
+def head_to_head(df: pd.DataFrame, player1: str, player2: str,  surface: str | None = None) -> dict:
+    m= df[
+        ((df["winner_name"] == player1) & (df["loser_name"] == player2))
+        | ((df["winner_name"] == player2) & (df["loser_name"] == player1))
+    ]
+    if surface:
+        m = m[m["surface"] == surface]
+
+    p1_wins = int((m["winner_name"] == player1).sum())
+    p2_wins = int((m["winner_name"] == player2).sum())
+    return {
+        "player1": player1,
+        "player2": player2,
+        "surface": surface,
+        "player1_wins": p1_wins,
+        "player2_wins": p2_wins,
+        "matches": len(m),
+    }
