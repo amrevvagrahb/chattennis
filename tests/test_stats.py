@@ -1,5 +1,5 @@
 import pytest
-from src.tools.stats import load_matches, win_rate, head_to_head, grand_slam_record, serve_stats, recent_form
+from src.tools.stats import load_matches, win_rate, head_to_head, grand_slam_record, serve_stats, recent_form, top_players
 
 @pytest.fixture(scope="module")
 def df():
@@ -92,3 +92,25 @@ def test_recent_form_results_valid(df):
 
 def test_unknown_player_empty(df):
     assert recent_form(df, "Nobody Atall") == []
+
+def test_top_players_length(df):
+    assert len(top_players(df, surface="Clay", year=2019, n=5)) == 5
+
+
+def test_top_players_sorted_descending(df):
+    rates = [p["win_rate"] for p in top_players(df, surface="Clay", year=2019, n=5)]
+    assert rates == sorted(rates, reverse=True)
+
+
+def test_min_matches_respected(df):
+    for p in top_players(df, surface="Clay", year=2019, min_matches=15):
+        assert p["matches"] >= 15
+
+
+def test_bad_metric_raises(df):
+    with pytest.raises(ValueError):
+        top_players(df, metric="nonsense")
+
+
+def test_no_matches_returns_empty(df):
+    assert top_players(df, year= 1900) == []

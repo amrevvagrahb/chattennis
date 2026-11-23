@@ -108,3 +108,39 @@ def recent_form(df: pd.DataFrame, player: str, n: int = 10) -> list[dict]:
             "score": row["score"],
         })
     return results
+
+def top_players(
+    df: pd.DataFrame,
+    surface: str | None = None,
+    year: int | None = None,
+    metric: str = "win_rate",
+    n: int = 5,
+    min_matches: int = 10,
+) -> list[dict]:
+    if metric not in ("win_rate", "wins"):
+        raise ValueError("metric must be 'win_rate' or 'wins'")
+
+    m = df
+    if surface:
+        m = m[m["surface"] == surface]
+    if year:
+        m = m[m["year"] == year]
+
+    wins = m["winner_name"].value_counts().rename("wins")
+    losses = m["loser_name"].value_counts().rename("losses")
+    table = pd.concat([wins, losses], axis=1).fillna(0)
+    table["matches"] = table["wins"] + table["losses"]
+    table = table[table["matches"] >= min_matches]
+    table["win_rate"] = table["wins"] / table["matches"]
+
+    top = table.sort_values(metric, ascending=False).head(n)
+    return [
+        {
+            "player": name,
+            "wins": int(row["wins"]),
+            "losses": int(row["losses"]),
+            "matches": int(row["matches"]),
+            "win_rate": round(float(row["win_rate"]), 3),
+        }
+        for name, row in top.iterrows()
+    ]
