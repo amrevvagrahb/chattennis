@@ -1,5 +1,5 @@
 import pytest
-from src.tools.stats import load_matches, win_rate, head_to_head
+from src.tools.stats import load_matches, win_rate, head_to_head, grand_slam_record, serve_stats
 
 @pytest.fixture(scope="module")
 def df():
@@ -43,3 +43,34 @@ def test_h2h_surface_filter(df):
     overall = head_to_head(df, "Rafael Nadal", "Roger Federer")
     clay = head_to_head(df, "Rafael Nadal", "Roger Federer", surface="Clay")
     assert clay["matches"] <= overall["matches"]    
+
+def test_slam_wins_plus_losses(df):
+    r = grand_slam_record(df, "Rafael Nadal")
+    assert r["wins"] + r["losses"] > 0
+
+
+def test_titles_not_more_than_finals(df):
+    r = grand_slam_record(df, "Roger Federer")
+    assert r["titles"] <= r["finals_played"]
+
+
+def test_unknown_player_has_no_titles(df):
+    r = grand_slam_record(df, "Nobody Atall")
+    assert r["titles"] == 0 and r["wins"] == 0
+
+def test_serve_percentages_in_range(df):
+    r = serve_stats(df, "Rafael Nadal")
+    assert 0 <= r["first_serve_pct"] <= 1
+    assert 0 <= r["bp_saved_pct"] <= 1
+
+
+def test_stats_matches_not_more_than_all_matches(df):
+    all_m = win_rate(df, "Rafael Nadal")["matches"]
+    r = serve_stats(df, "Rafael Nadal")
+    assert r["matches_with_stats"] <= all_m
+
+
+def test_unknown_player_serve_is_none(df):
+    r = serve_stats(df, "Nobody Atall")
+    assert r["matches_with_stats"] == 0
+    assert r["aces_per_match"] is None

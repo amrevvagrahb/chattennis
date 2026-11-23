@@ -1,4 +1,4 @@
-from src.tools.stats import load_matches, head_to_head, win_rate
+from src.tools.stats import load_matches, head_to_head, win_rate, grand_slam_record, serve_stats
 df = load_matches()
 
 # print("rows:", len(df))
@@ -10,4 +10,9 @@ df = load_matches()
 # print(win_rate(df, "Rafael Nadal", surface="Clay"))
 # print(win_rate(df, "Rafael Nadal", surface="Grass"))
 
-print(head_to_head(df, "Rafael Nadal", "Roger Federer"))
+# print(head_to_head(df, "Rafael Nadal", "Roger Federer"))
+
+# print(grand_slam_record(df, "Rafael Nadal"))
+
+print(serve_stats(df, "Rafael Nadal"))
+print(serve_stats(df, player= "John Isner"))

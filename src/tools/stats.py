@@ -55,3 +55,38 @@ def head_to_head(df: pd.DataFrame, player1: str, player2: str,  surface: str | N
         "player2_wins": p2_wins,
         "matches": len(m),
     }
+
+def grand_slam_record(df: pd.DataFrame, player: str) -> dict:
+    slams = df[df["tourney_level"] == "G"]
+    m = player_matches(slams, player)
+
+    wins = int(m["won"].sum())
+    finals = m[m["round"] == "F"]
+    return {
+        "player": player,
+        "wins": wins,
+        "losses": len(m) - wins,
+        "finals_played": len(finals),
+        "titles": int(finals["won"].sum()),
+    }
+
+def serve_stats(df: pd.DataFrame, player: str, surface: str|None = None) -> dict:
+    m = player_matches(df, player)
+    if surface:
+        m = m[m["surface"] == surface]
+    m = m.dropna(subset=["w_svpt", "l_svpt"])  
+
+    def mine(col):
+        return m[f"w_{col}"].where(m["won"], m[f"l_{col}"])
+
+    n = len(m)
+    svpt = mine("svpt").sum()
+    bp_faced = mine("bpFaced").sum()
+    return {
+        "player": player,
+        "surface": surface,
+        "matches_with_stats": n,
+        "aces_per_match": round(mine("ace").sum() / n, 2) if n else None,
+        "first_serve_pct": round(mine("1stIn").sum() / svpt, 3) if svpt else None,
+        "bp_saved_pct": round(mine("bpSaved").sum() / bp_faced, 3) if bp_faced else None,
+    }
