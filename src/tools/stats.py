@@ -90,3 +90,21 @@ def serve_stats(df: pd.DataFrame, player: str, surface: str|None = None) -> dict
         "first_serve_pct": round(mine("1stIn").sum() / svpt, 3) if svpt else None,
         "bp_saved_pct": round(mine("bpSaved").sum() / bp_faced, 3) if bp_faced else None,
     }
+
+def recent_form(df: pd.DataFrame, player: str, n: int = 10) -> list[dict]:
+    m = player_matches(df, player)
+    m = m.sort_values(["tourney_date", "match_num"]).tail(n)
+
+    results = []
+    for _, row in m.iterrows():
+        won = bool(row["won"])
+        results.append({
+            "date": row["tourney_date"].strftime("%Y-%m-%d"),
+            "tournament": row["tourney_name"],
+            "round": row["round"],
+            "surface": row["surface"],
+            "opponent": row["loser_name"] if won else row["winner_name"],
+            "result": "W" if won else "L",
+            "score": row["score"],
+        })
+    return results

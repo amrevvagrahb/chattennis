@@ -1,5 +1,5 @@
 import pytest
-from src.tools.stats import load_matches, win_rate, head_to_head, grand_slam_record, serve_stats
+from src.tools.stats import load_matches, win_rate, head_to_head, grand_slam_record, serve_stats, recent_form
 
 @pytest.fixture(scope="module")
 def df():
@@ -74,3 +74,21 @@ def test_unknown_player_serve_is_none(df):
     r = serve_stats(df, "Nobody Atall")
     assert r["matches_with_stats"] == 0
     assert r["aces_per_match"] is None
+
+def test_recent_form_length(df):
+    assert len(recent_form(df, "Rafael Nadal", n=10)) == 10
+
+
+def test_recent_form_is_in_date_order(df):
+    dates = [r["date"] for r in recent_form(df, "Rafael Nadal", n=10)]
+    assert dates == sorted(dates)
+
+
+def test_recent_form_results_valid(df):
+    for r in recent_form(df, "Rafael Nadal", n=10):
+        assert r["result"] in ("W", "L")
+        assert r["opponent"] != "Rafael Nadal"
+
+
+def test_unknown_player_empty(df):
+    assert recent_form(df, "Nobody Atall") == []
