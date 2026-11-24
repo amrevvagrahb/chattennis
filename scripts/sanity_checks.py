@@ -1,6 +1,9 @@
 from src.tools.stats import load_matches, head_to_head, win_rate, grand_slam_record, serve_stats, recent_form, top_players
 from src.tools.stats_tools import win_rate_tool
-df = load_matches()
+from collections import Counter
+from src.ingest import load_pages, chunk_pages
+
+# df = load_matches()
 
 # print("rows:", len(df))
 # print(df[["winner_name", "loser_name", "surface", "year"]].head())
@@ -22,4 +25,12 @@ df = load_matches()
 
 # print(top_players(df, surface="Clay", year=2019, n=5))
 
-print(win_rate_tool('murray'))
+# print(win_rate_tool('murray'))
+
+# pages= load_pages()
+# print(Counter(p["source"] for p in pages))
+# print(pages[0]["text"][:300])
+
+chunks = chunk_pages(load_pages())
+print("chunks:", len(chunks))
+print(chunks[10])

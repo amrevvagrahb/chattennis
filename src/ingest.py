@@ -13,3 +13,22 @@ def load_pages(docs_dir: Path = DOCS_DIR) -> list[dict]:
             if text:
                 pages.append({"source": pdf.name, "page": i, "text": text})
     return pages
+
+
+def chunk_pages(pages: list[dict], size: int = 800, overlap: int = 100) -> list[dict]:
+    chunks = []
+    step = size - overlap
+    for p in pages:
+        text = p["text"]
+        start = 0
+        while start < len(text):
+            piece = text[start:start + size].strip()
+            if piece:
+                chunks.append({
+                    "source": p["source"],
+                    "page": p["page"],
+                    "text": piece,
+                })
+            if start + size >= len(text):
+                break
+            start += step
