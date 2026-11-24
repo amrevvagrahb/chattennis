@@ -2,6 +2,7 @@ from src.tools.stats import load_matches, head_to_head, win_rate, grand_slam_rec
 from src.tools.stats_tools import win_rate_tool
 from collections import Counter
 from src.ingest import load_pages, chunk_pages
+from src.tools.doc_search import doc_search_tool
 
 # df = load_matches()
 
@@ -31,6 +32,17 @@ from src.ingest import load_pages, chunk_pages
 # print(Counter(p["source"] for p in pages))
 # print(pages[0]["text"][:300])
 
-chunks = chunk_pages(load_pages())
-print("chunks:", len(chunks))
-print(chunks[10])
+# chunks = chunk_pages(load_pages())
+# print("chunks:", len(chunks))
+# print(chunks[10])
+
+queries = [
+    "How high is the net at the centre?",
+    "What is a let?",
+    "How do I bake bread?",
+]
+for q in queries:
+    r = doc_search_tool(q, max_distance=2.0)  # no filtering, just look at distances
+    print("\n", q)
+    for p in r["passages"]:
+        print(f'    {p["distance"]}  {p["source"][:20]} p.{p["page"]}  {p["text"][:90]!r}')
