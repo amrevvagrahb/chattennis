@@ -1,4 +1,4 @@
-from src.tools.stats_tools import win_rate_tool, head_to_head_tool
+from src.tools.stats_tools import win_rate_tool, head_to_head_tool, grand_slam_record_tool, serve_stats_tool, recent_form_tool, top_players_tool
 
 def test_alias_resolves_and_returns_stats():
     r = win_rate_tool("rafa", surface="Clay")
@@ -30,3 +30,25 @@ def test_h2h_tool_first_name_ambiguous():
 def test_h2h_tool_same_player_invalid():
     r = head_to_head_tool("nadal", "rafa")
     assert r['status'] == 'invalid'
+
+def test_slam_tool_ok():
+    r = grand_slam_record_tool("nadal")
+    assert r["status"] == "ok" and r["titles"] > 0
+
+
+def test_serve_tool_ambiguous():
+    assert serve_stats_tool("murray")["status"] == "ambiguous"
+
+
+def test_recent_form_tool_returns_matches():
+    r = recent_form_tool("nadal", n=3)
+    assert r["status"] == "ok" and len(r["matches"]) == 3
+
+
+def test_top_players_tool_bad_metric():
+    assert top_players_tool(metric="nonsense")["status"] == "invalid"
+
+
+def test_top_players_tool_ok():
+    r = top_players_tool(surface="Clay", year=2019, n=3)
+    assert r['status'] == 'ok' and len(r['players']) == 3 
